@@ -22,10 +22,10 @@ def load_contract(provider, address, chain='mainnet', saved_abi=False, proxy_add
 
 def get_abi(address, chain):
     if chain == 'mainnet':
-        api = os.getenv('ETHERSCAN_API')
+        api = os.getenv('ETHERSCAN_TOKEN')
         path = f'https://api.etherscan.io/api?module=contract&action=getabi&address={address}&apikey={api}'
     elif chain == 'optimism':
-        api = os.getenv('OPT_ETHERSCAN_API')
+        api = os.getenv('OPT_ETHERSCAN_TOKEN')
         path = f'https://api-optimistic.etherscan.io/api?module=contract&action=getabi&address={address}&apikey={api}'
     elif chain == 'arbitrum':
         api = os.getenv('ARBITRUM_ETHERSCAN_TOKEN')
