@@ -1,6 +1,8 @@
 """
 This module allows us to calculate the values associated with position values for UniswapV3:
 position value, delta and gamma.
+
+Uniswap V3 Liquidity math implemented from the whitepaper (https://uniswap.org/whitepaper-v3.pdf) and Prof Lambert's blog series (https://lambert-guillaume.medium.com/understanding-the-value-of-uniswap-v3-liquidity-positions-cdaaee127fe7)
 """
 import numpy as np
 
@@ -11,7 +13,7 @@ class UniswapV3():  # pragma: no cover
     Position value function, Delta, Gamma.
     """
 
-    def __init__(self, liquidity: float, initial_price: float, price_barriers: list):
+    def __init__(self, liquidity_usd: float, initial_price: float, price_barriers: list):
         """
         Class constructor.
 
@@ -22,16 +24,16 @@ class UniswapV3():  # pragma: no cover
 
         self.initial_price = initial_price
         self.price_barriers = price_barriers
-        self.liquidity_usd = liquidity
-        self.liquidity = self.convert_liquidity(liquidity, initial_price)
+        self.liquidity_usd = liquidity_usd
+        self.liquidity = self.convert_liquidity(liquidity_usd, initial_price)
         self.initial_quantity = self.calculate_initial_quantity()
         self.delta_e = self.delta_e_calculation()
 
-    def convert_liquidity(self, liquidity, price):
+    def convert_liquidity(self, liquidity_usd, price):
         """
-        TODO: COMMENT THE FUNCTION
+
         """
-        usd_amount = liquidity
+        usd_amount = liquidity_usd
         prices = [price, 1]
         lower_limit, upper_limit = self.price_barriers
         price_token0, price_token1 = prices
@@ -55,8 +57,6 @@ class UniswapV3():  # pragma: no cover
     def calculate_initial_quantity(self) -> list:
         """
         Calculates the initial quantity of tokens from the provided liquidity and initial price.
-
-        TODO: COMMENT THE FUNCTION
 
         :return: (list) List of the initial quantities.
         """
@@ -88,7 +88,7 @@ class UniswapV3():  # pragma: no cover
     @staticmethod
     def get_liquidity(amount_token0, amount_token1, current_price, upper_limit, lower_limit):
         """
-        TODO: COMMENT THE FUNCTION
+
         """
         sqr_c = np.sqrt(current_price)
         sqr_l = np.sqrt(lower_limit)
@@ -245,30 +245,8 @@ class UniswapV3():  # pragma: no cover
 
         return output
 
-    def calc_naive_straddle_hedge(self):
-        """
-        TODO: COMMENT THE FUNCTION
-        """
-        initial_delta = self.initial_quantity[0]
-
-        spot = self.initial_price
-        upper_bound = self.price_barriers[1]
-        call_slope = -initial_delta
-        loss_at_bound = self.position_value(upper_bound) - self.liquidity_usd - initial_delta * (upper_bound - spot)
-        call_intercept = loss_at_bound - call_slope * upper_bound
-        call_strike = -call_intercept / call_slope
-        call_qty = -call_slope
-
-        lower_bound = self.price_barriers[0]
-        put_slope = self.position_value_delta(lower_bound) - initial_delta
-        loss_at_bound = self.position_value(lower_bound) - self.liquidity_usd - initial_delta * (lower_bound - spot)
-        put_intercept = loss_at_bound - put_slope * lower_bound
-        put_strike = -put_intercept / put_slope
-        put_qty = put_slope
-
-        return call_qty, call_strike, put_qty, put_strike
     
-    def perp_position_pnl(self, price: float) -> float:
+    def perp_v2_position_pnl(self, price: float) -> float:
         
         initial_delta = -self.position_value_delta(self.initial_price)
         
@@ -280,7 +258,7 @@ class UniswapV3():  # pragma: no cover
         return perp_position_value
     
     
-    def perp_position_delta(self, price: float) -> float:
+    def perp_v2_position_delta(self, price: float) -> float:
         
         initial_delta = -self.position_value_delta(self.initial_price)
         
